@@ -29,4 +29,3 @@ A test project with the following plan for development
 ![videos listing](https://res.cloudinary.com/dqqagrosc/image/upload/v1642617656/8429febf-9751-4712-93b0-e72d66941bbe_aj1naj.jpg)
 
 ![Custom Posts](https://res.cloudinary.com/dqqagrosc/image/upload/v1642617812/a9a23eb2-78e9-4724-a375-ed70844134ff_rbub5v.jpg)
-

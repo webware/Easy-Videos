@@ -19,6 +19,7 @@
  * @subpackage Easy_Videos/admin
  * @author     Irshad  
  */
+ 
 class Easy_Videos_Admin {
 
 	/**
@@ -74,7 +75,7 @@ class Easy_Videos_Admin {
 			$this->easy_videos = $easy_videos;
 			$this->version = $version;
 	    	$this->api_keys = $api_keys;
-			$this->channelId = 'UCiq1FIgtEK7LRAOB1JXTPig';
+			$this->channelId = 'UCn68MHKSGluDcSQbABxW4EQ';
 
 	}
 
@@ -88,7 +89,7 @@ class Easy_Videos_Admin {
 	 * @since    1.0.0
 	 */
 	public function easy_videos_import() {
-
+            
 		/**
 		 * This function is used for registering import page under custom post type.
 		 *
@@ -104,51 +105,143 @@ class Easy_Videos_Admin {
 
 		
 		
-		add_submenu_page('edit.php?post_type=easy-videos', __( 'Easy Import', 'easy-import' ),  __( 'Easy Import', 'easy-import' ),'manage_options','easy-import', array( $this, 'easy_videos_import_callback' ) );
+		add_submenu_page('edit.php?post_type=easy-videos', __( 'Easy Import', 'easy-import' ),  __( 'Easy Import', 'easy-import' ),'manage_options','easy-import', array( $this, 'easy_videos_listing_callback' ) );
 
 	}
 	
 	
-		/**
+	
+	/**
+	 * Register the JavaScript for the admin area.
+	 *
+	 * @since    1.0.0
+	 */
+	public function enqueue_scripts() {
+      
+	   /**
+		 * This function have all admin side JS.
 		 *
-		 * Call back function 
+		 * An instance of this class should be passed to the run() function
+		 * defined in Plugin_Name_Loader as all of the hooks are defined
+		 * in that particular class.
 		 *
-		 * List youtube videos per channel 
-		 * Select videos to import to WP database
-		 *
+		 * The Easy_Videos_Loader will then create the relationship
+		 * between the defined hooks and the functions defined in this
+		 * class.
 		 */
-	 
-     
-	 
-    public function easy_videos_import_callback() {
+       
+		 wp_enqueue_script( $this->easy_videos, plugin_dir_url( __FILE__ ) . 'js/easy-videos-admin.js', array( 'jquery' ), $this->version, false );
+		
+  		
+		// wp_enqueue_script( 'jquery-ui-selectable',get_site_url().'/wp-includes/js/jquery/ui/selectable.min.js' , array( 'jquery' ), $this->version, false);
+		
+		/**
+		 * Loaded jquery default library 
+		 *
+		 * 
+		 */
+		wp_enqueue_script( 'jquery-ui-selectable');
 		 
+		 
+		 
+		/* Sometimes you want to have access to data on the front end in your Javascript file
+         * Getting that requires this call. Always go ahead and include ajaxurl. Any other variables,
+         * add to the array.
+         * Then in the Javascript file, you can refer to it like this: easy_video_variables.ajaxurl
+         */
+		 
+		 wp_localize_script( $this->easy_videos, 'easy_video_variables', array(
+            'ajaxurl' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('_wpnonce')
+        ));
 
+	}
+	
+	
+	
+	/**
+	 * Register the stylesheets for the admin area.
+	 *
+	 * @since    1.0.0
+	 */
+	public function enqueue_styles() {
+
+		/**
+		 * This function have css for admin side.
+		 *
+		 * An instance of this class should be passed to the run() function
+		 * defined in Easy_Videos_Loader as all of the hooks are defined
+		 * in that particular class.
+		 *
+		 * The Easy_Videos_Loader will then create the relationship
+		 * between the defined hooks and the functions defined in this
+		 * class.
+		 */
+
+		wp_enqueue_style( $this->easy_videos, plugin_dir_url( __FILE__ ) . 'css/easy-videos-admin.css', array(), $this->version, 'all' );
+
+	}
+	
+   /**
+	*
+	* Call back function 
+	*
+	* List youtube videos per channel 
+	* Select videos to import to WP database
+	*
+	*/
+    public function easy_videos_listing_callback() {
+		 
+               // echo "this is link ...  . " . get_site_url().'/wp-includes/js/jquery/ui/selectable.min.js'; 
 			   $yt_api_url = "https://www.googleapis.com/youtube/v3/search?key=".$this->api_keys."&channelId=".$this->channelId."&part=snippet,id&order=date&maxResults=10";
 			   $yt_json = file_get_contents($yt_api_url);
 			
 			 
 			  if($yt_json){ 
 					$videoList = json_decode($yt_json); 
+					// echo "<pre>"; print_r( $videoList ); echo "</pre>";
 				}else{ 
 					echo 'Invalid API key or channel ID.'; 
 				}
 				
 			  if(!empty($videoList->items)){ 
-			   echo '<div class="attachments-wrapper"> <ul tabindex="-1" class="attachments ui-sortable ui-sortable-disabled">';
+			   echo '<form id="import_easy_videos"><div class="videos-wrapper"> <ul class="nav" id="selectable">';
 				foreach($videoList->items as $item){ 
 					// Embed video 
 					if(isset($item->id->videoId)){ 
 						echo ' 
-						<li tabindex="0" role="checkbox" aria-checked="false" data-id="14" class="attachment save-ready"> 
+						<li role="checkbox" data-id="'.$item->id->videoId.'" class="save-ready"> 
 							<iframe width="280" height="150" src="https://www.youtube.com/embed/'.$item->id->videoId.'" frameborder="0" allowfullscreen></iframe> 
-							<h4>'. $item->snippet->title .'</h4> 
-						</li>'; 
+							<h4>'. $item->snippet->title .'</h4>';
+						
+						echo '<input type="hidden" name="id" value="'.$item->id->videoId.'" >' ;
+						echo '<input type="hidden" name="publishedAt" value="'.$item->snippet->publishedAt.'" >' ;
+						echo '<input type="hidden" name="channelId" value="'.$item->snippet->channelId.'" >' ;
+						echo '<input type="hidden" name="title" value="'.$item->snippet->title.'" >' ;
+						echo '<input type="hidden" name="description" value="'.$item->snippet->description.'" >' ;
+							
+						echo '</li>'; 
+						
+						
+						
+						
+
 					} 
 				} 
-				echo '</div>';
+				
+								
+				
+				
+				echo '<input type="hidden" name="action" value="esay_import" >' ;
+                echo '<input id="submit_btn" type="submit" name="submit" value="Import Videos" class="button button-primary">';
+				echo '</div></form>';
+				echo '<div id="response"></div>';
 			}else{ 
 				echo '<p class="error">'.$apiError.'</p>'; 
 			}
+			
+			
+			
 			
    }
 	
@@ -213,7 +306,75 @@ class Easy_Videos_Admin {
 
 	}
 	
+	
+	public function easy_videos_import_callback() {
 		
+
+		// check_ajax_referer( '_wpnonce', 'security');
+		echo "<pre>"; print_r($_POST) ; echo "</pre>"; // in json 
+       //  print_r(json_decode($_POST['data'],true)); //for array
+		//echo "<pre>"; print_r( json_encode( $_POST ) ); echo "</pre>"; 
+		/* $i = 0; $j = 0;
+		 foreach($_POST as $key   ){
+             echo ' i is .... ' . $i; 
+echo "<pre>"; print_r($key) ; echo "</pre>";			  
+
+            // echo ' <br> key ' .  ;
+      	 	 //echo '      value '. $value[$i];	 
+		     
+             foreach($key as $in ){
+				 echo ' j is ...  '. $j; 
+			    echo "<pre>"; print_r($in) ; echo "</pre>";			  	  
+			     $j++;
+			  }
+		     
+		   
+		   $i++;
+		 } */
+		// stop execution afterward.
+        wp_die();
+		
+		
+		
+	}
+	
+		
+		
+			
+		public function create_youvid_taxonomy() {
+
+			// Add new taxonomy, NOT hierarchical (like tags)
+			$labels = array(
+				'name'                       => _x( 'Categories', 'taxonomy general name', 'easy-videos' ),
+				'singular_name'              => _x( 'Category', 'taxonomy singular name', 'easy-videos' ),
+				'search_items'               => __( 'Search Categories', 'easy-videos' ),
+				'popular_items'              => __( 'Popular Categories', 'easy-videos' ),
+				'all_items'                  => __( 'All Categories', 'easy-videos' ),
+				'parent_item'                => null,
+				'parent_item_colon'          => null,
+				'edit_item'                  => __( 'Edit Category', 'easy-videos' ),
+				'update_item'                => __( 'Update Category', 'easy-videos' ),
+				'add_new_item'               => __( 'Add New Category', 'easy-videos' ),
+				'new_item_name'              => __( 'New Category Name', 'easy-videos' ),
+				'separate_items_with_commas' => __( 'Separate Categories with commas', 'easy-videos' ),
+				'add_or_remove_items'        => __( 'Add or remove Categories', 'easy-videos' ),
+				'choose_from_most_used'      => __( 'Choose from the most used Categories', 'easy-videos' ),
+				'not_found'                  => __( 'No Categories found.', 'easy-videos' ),
+				'menu_name'                  => __( 'Categories', 'easy-videos' ),
+			);
+
+			$args = array(
+				'hierarchical'          => false,
+				'labels'                => $labels,
+				'show_ui'               => true,
+				'show_admin_column'     => true,
+				'update_count_callback' => '_update_post_term_count',
+				'query_var'             => true,
+				'rewrite'               => array( 'slug' => 'video-cat' ),
+			);
+
+			register_taxonomy( 'youtube_category', 'easy-videos', $args );
+	}
 
 
 }

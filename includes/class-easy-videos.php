@@ -69,7 +69,7 @@ class Easy_Videos {
 
 	/**
 	 * Define the core functionality of the plugin.
-	 *
+	 *  AIzaSyD9Cpf3qomhYfd5oKZ4X4jvNovNfx-byaY
 	 * Set the plugin name and the plugin version that can be used throughout the plugin.
 	 * Load the dependencies, define the locale, and set the hooks for the admin area and
 	 * the public-facing side of the site.
@@ -83,7 +83,7 @@ class Easy_Videos {
 			$this->version = '1.0.0';
 		}
 		$this->easy_videos = 'easy-videos';
-        $this->api_keys    = 'AIzaSyD9Cpf3qomhYfd5oKZ4X4jvNovNfx-byaY';
+        $this->api_keys    = 'AIzaSyBevL2P0mBUIaZPjfF9d-cv_u_bDIJle2E';
 		$this->load_dependencies();
 		$this->set_locale();
 		$this->define_admin_hooks();
@@ -166,6 +166,15 @@ class Easy_Videos {
 	
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'easy_videos_import' );
 		$this->loader->add_action( 'init', $plugin_admin, 'reg_easy_videos_post' );
+		$this->loader->add_action( 'init', $plugin_admin, 'create_youvid_taxonomy' );
+		
+		
+		// Ajax function for submitting videos import request 
+		$this->loader->add_action( 'wp_ajax_esay_import', $plugin_admin, 'easy_videos_import_callback' );
+		 $this->loader->add_action( 'wp_ajax_nopriv_esay_import', $plugin_admin, 'easy_videos_import_callback' );
+		
+		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
+		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		
 	
 

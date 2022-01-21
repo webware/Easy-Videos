@@ -1,0 +1,36 @@
+/**
+ * All of the CSS admin-specific functionality should be
+ * included in this file.
+ */
+ 
+ ul.nav {
+  padding-left: 0px;
+   
+  text-align: center;
+}
+ul.nav > li {
+  display: inline-block;
+  padding: 10px 20px;
+   width: 30%;
+    margin: 0 auto;
+	text-align:left;
+}
+ul.nav > li h4{
+	width:50%;
+}
+ul.nav > li:hover {
+  background-color: #2779BF;
+}
+ul.nav > li > a {
+  color: white;
+  text-decoration: none;
+}
+
+#submit_btn{ display:block;     margin-top: 20px; }
+
+
+#selectable .ui-chosen {
+  background: #F39814;
+  color: white;
+}
+
