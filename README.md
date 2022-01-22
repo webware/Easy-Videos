@@ -21,6 +21,8 @@ A test project with the following plan for development
 - Plugin structure created
 - Videos fetched from a specific channel 
 - Custom posts created
+- Admin can create videos for the list
+- Videos now saving to custom posts  
 
 
 
