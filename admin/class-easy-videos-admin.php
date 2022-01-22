@@ -233,6 +233,7 @@ class Easy_Videos_Admin {
 				
 				
 				echo '<input type="hidden" name="action" value="esay_import" >' ;
+				echo '<input type="hidden" name="totalchosen" id="totalchosen" value="0"  >' ;
                 echo '<input id="submit_btn" type="submit" name="submit" value="Import Videos" class="button button-primary">';
 				echo '</div></form>';
 				echo '<div id="response"></div>';
@@ -311,26 +312,28 @@ class Easy_Videos_Admin {
 		
 
 		// check_ajax_referer( '_wpnonce', 'security');
-		echo "<pre>"; print_r($_POST) ; echo "</pre>"; // in json 
+		// echo "<pre>"; print_r($_POST) ; echo "</pre>"; // in json 
        //  print_r(json_decode($_POST['data'],true)); //for array
 		//echo "<pre>"; print_r( json_encode( $_POST ) ); echo "</pre>"; 
-		/* $i = 0; $j = 0;
-		 foreach($_POST as $key   ){
-             echo ' i is .... ' . $i; 
-echo "<pre>"; print_r($key) ; echo "</pre>";			  
-
-            // echo ' <br> key ' .  ;
-      	 	 //echo '      value '. $value[$i];	 
-		     
-             foreach($key as $in ){
-				 echo ' j is ...  '. $j; 
-			    echo "<pre>"; print_r($in) ; echo "</pre>";			  	  
-			     $j++;
-			  }
-		     
+		
+//		echo 'count is ... '.
+		$count = count($_POST[id]); 
+		
+		for($i=0; $i<$count; $i++){
+			
+			$id                 = $_POST[id][$i];
+			$publishedAt        = $_POST[publishedAt][$i];
+			$channelId    	    = $_POST[channelId][$i];
+			$title        	    = $_POST[title][$i];
+			$description        = $_POST[description][$i];
+		    
+			$this->insert_to_post( $id, $publishedAt, $channelId, $title, $description );
+		
+		}
+		
 		   
-		   $i++;
-		 } */
+		  // $i++;
+		 //} 
 		// stop execution afterward.
         wp_die();
 		
@@ -338,10 +341,43 @@ echo "<pre>"; print_r($key) ; echo "</pre>";
 		
 	}
 	
+	/*  Create new post for the selected video 
+	*
+	*
+	*
+	*
+	*/
+	
+	public function insert_to_post( $id, $publishedAt, $channelId, $title, $description ){
 		
+	
+					// Create post object
+					$args = array(
+					  'post_title'    => wp_strip_all_tags( $title ),
+					  'post_content'  => $description,
+					  'post_type'     => 'easy-videos',
+					  'post_status'   => 'publish',
+					  'post_author'   => 1
+					);
+					 
+					// Insert the post into the database
+					
+				    $post_id = wp_insert_post($args);
+					if(!is_wp_error($post_id)){
+					  echo '<br>Post created';  //the post is valid
+					}else{
+					  //there was an error in the post insertion, 
+					  echo '<br>'. $post_id->get_error_message();
+					}
 		
+	}
+		
+	/*  Create custom taxonomy 
+     *
+     *
+     */	 
 			
-		public function create_youvid_taxonomy() {
+     public function create_youvid_taxonomy() {
 
 			// Add new taxonomy, NOT hierarchical (like tags)
 			$labels = array(
